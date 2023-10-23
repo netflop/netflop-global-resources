@@ -22,7 +22,7 @@ on:
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
-    #if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4
@@ -34,9 +34,7 @@ jobs:
         run: echo $AWS_REGION, $ENVIRONMENT
 
       - name: Install AWS CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install awscli
+        run: sudo apt-get install awscli
 
       - name: AWS Configuration
         run: |
@@ -53,9 +51,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-
-      - name: Execute Gradle build
-        run: gradle task buildZip
 
       - name: Set up Node
         uses: actions/setup-node@v3

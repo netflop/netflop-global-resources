@@ -6,7 +6,7 @@ env:
   ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
   GITHUB_TOKEN: ${{ secrets.TH_GITHUB_TOKEN }}
   REVIEWERS: ("thanghuynh2608" "cuongvu209" "truongyennguyen" "yoralong")
-  PR_OWNER: "${{ github.event.pull_request.user.login }}"
+  PR_OWNER: "${{ github.actor }}"
 on:
   push:
     branches:
@@ -27,16 +27,11 @@ jobs:
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4
-      
-      - name: Print GitHub context
-        run: echo "$GITHUB_CONTEXT"
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
 
       - name: Auto add reviewer
         run: |
           # Remove the owner from the reviewers list
-          LIST_REVIEWERS=${REVIEWERS[@]/$PR_OWNER/}
+          LIST_REVIEWERS=${REVIEWERS[@]/"$PR_OWNER"/}
 
           # Build payload
           PAYLOAD="{\"reviewers\":["

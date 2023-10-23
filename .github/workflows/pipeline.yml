@@ -34,7 +34,9 @@ jobs:
         run: echo $AWS_REGION, $ENVIRONMENT
 
       - name: Install AWS CLI
-        run: sudo apt-get install awscli
+        run: |
+          sudo apt-get update
+          sudo apt-get install awscli
 
       - name: AWS Configuration
         run: |

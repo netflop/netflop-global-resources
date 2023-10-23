@@ -1,7 +1,7 @@
 name: GitHub Workflows
 run-name: ${{ github.actor }} is creating a new pull request to ${{ github.base_ref }} to Netflop Global Resource 🐧🐧🐧
 env:
-  AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION  }}
+  AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION }}
   AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESSKEYID }}
   AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRETKEY }}
   ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
@@ -29,6 +29,9 @@ jobs:
 
 #      - name: Cache dependencies # To cache -> reduce dependencies restore and build time. Investigating
 #        uses: actions/cache@v3
+
+      - name: Check ENV variable
+        run: echo $AWS_REGION, $ENVIRONMENT
 
       - name: AWS Configuration
         uses: aws-actions/configure-aws-credentials@v4

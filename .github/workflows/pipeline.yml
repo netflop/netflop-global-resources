@@ -1,10 +1,10 @@
 name: GitHub Workflows
-run-name: ${{ github.actor }} is creating a new pull request to ${{ github.base_ref }} to Netflop Global Resource 🐧🐧🐧
 env:
   AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION }}
   AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRET_KEY }}
   ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
+  GITHUB_TOKEN: ${{ secrets.TH_GITHUB_TOKEN }}
 on:
   push:
     branches:
@@ -20,6 +20,33 @@ on:
       - closed
   workflow_dispatch:
 jobs:
+  add-reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+
+      - name: Get pull request information
+        id: pr-info
+        run: |
+          PR_OWNER=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PR_NUMBER" | jq -r '.user.login')
+          echo "::set-output name=owner::$PR_OWNER"
+      
+      - name: Auto add reviewer
+        run: |
+          reviewers=("thanghuynh2608" "cuongvu209" "truongyennguyen" "yoralong")
+          PR_OWNER="${{ steps.pr-info.outputs.owner }}"
+          # Remove the owner from the reviewers list
+          reviewers=(${reviewers[@]/$PR_OWNER/})
+          payload="{\"reviewers\":["
+          for reviewer in "${reviewers[@]}"; do
+            payload="$payload\"$reviewer\","
+          done
+          payload="${payload%,}]}"
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PR_NUMBER/requested_reviewers" -d "$payload"
+          echo "Added reviewers $payload to pull request $GITHUB_PR_NUMBER"
+
+
   deploy-app:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true

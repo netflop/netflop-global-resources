@@ -63,10 +63,12 @@ jobs:
         run: |
           npm install -g aws-cdk
 
-      - name: CDK Synth
+      - name: Synth, Bootstrap and Deploy app
         run: |
           cd infrastructure
           cdk synth -c env=$ENVIRONMENT
+          cdk bootstrap -c env=$ENVIRONMENT
+          cdk deploy -c env=$ENVIRONMENT --require-approval never
 
 #       PUBLISH & UPLOAD ARTIFACT
 #      - name: Upload Artifact
@@ -79,9 +81,3 @@ jobs:
 #        uses: actions/download-artifact@v3
 #        with:
 #          name: dist-file
-
-      - name: CDK bootstrap
-        run: cdk bootstrap -c env=$ENVIRONMENT
-
-      - name: Deploy
-        run: cdk deploy -c env=$ENVIRONMENT --require-approval never

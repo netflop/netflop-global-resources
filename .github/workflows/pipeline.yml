@@ -40,6 +40,8 @@ jobs:
           # Build payload
           JSON_PAYLOAD="{\"reviewers\":[\"${REVIEWERS[@]}\"]}"
 
+          echo $REVIEWERS, @JSON_PAYLOAD
+
           curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \

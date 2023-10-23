@@ -1,7 +1,7 @@
 name: GitHub Workflows
 run-name: ${{ github.actor }} is creating a new pull request to ${{ github.base_ref }} to Netflop Global Resource 🐧🐧🐧
 env:
-  AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION }}
+  AWS_REGION: 'us-east-1'
   AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESSKEYID }}
   AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRETKEY }}
   ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
@@ -22,7 +22,7 @@ on:
 jobs:
   deploy-app:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    #if: github.event.pull_request.merged == true
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4

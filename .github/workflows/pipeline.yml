@@ -4,7 +4,7 @@ env:
   AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION  }}
   AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESSKEYID }}
   AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRETKEY }}
-  ENVIRONMENT: ${{ github.base_ref == 'prod' && 'master' || 'dev' }}
+  ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
 on:
   push:
     branches:
@@ -79,4 +79,4 @@ jobs:
         run: cdk bootstrap -c env=$ENVIRONMENT
 
       - name: Deploy
-        run: cdk deploy -c env=$ENVIRONMENT
+        run: cdk deploy -c env=$ENVIRONMENT --require-approval never

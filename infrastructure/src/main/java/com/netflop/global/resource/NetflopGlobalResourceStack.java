@@ -29,7 +29,7 @@ public class NetflopGlobalResourceStack extends Stack {
 
         // Get environment
         String env = (String)this.getNode().tryGetContext("env");
-        if(env.isEmpty()) {
+        if(env == null || env.isEmpty()) {
             env = "dev";
         }
 

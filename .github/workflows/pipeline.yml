@@ -2,8 +2,8 @@ name: GitHub Workflows
 run-name: ${{ github.actor }} is creating a new pull request to ${{ github.base_ref }} to Netflop Global Resource 🐧🐧🐧
 env:
   AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESSKEYID }}
-  AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRETKEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRET_KEY }}
   ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
 on:
   push:
@@ -33,12 +33,14 @@ jobs:
       - name: Check ENV variable
         run: echo $AWS_REGION, $ENVIRONMENT
 
+      - name: Install AWS CLI
+        run: sudo apt-get install awscli
+
       - name: AWS Configuration
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: $AWS_REGION
-          aws-access-key-id: $AWS_ACCESS_KEY_ID
-          aws-secret-key: $AWS_SECRET_KEY
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_KEY
+          aws configure set default.region $AWS_REGION
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -49,9 +51,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-
-      - name: Execute Gradle build
-        run: gradle task buildZip
 
       - name: Set up Node
         uses: actions/setup-node@v3

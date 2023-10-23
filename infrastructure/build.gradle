@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'groovy'
+}
+
+group = 'com.netflop.global.resource'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+def CDK_VERSION = "2.101.1"
+
+application {
+    mainClass = 'com.netflop.global.resource.NetflopGlobalResourceApp'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "software.amazon.awscdk:aws-cdk-lib:${CDK_VERSION}"
+}

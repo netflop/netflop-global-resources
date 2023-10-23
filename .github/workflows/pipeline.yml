@@ -17,6 +17,7 @@ on:
       - reopened
       - edited
       - synchronize
+      - closed
   workflow_dispatch:
 jobs:
   deploy-app:

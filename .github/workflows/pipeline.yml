@@ -1,0 +1,82 @@
+name: GitHub Workflows
+run-name: ${{ github.actor }} is creating a new pull request to ${{ github.base_ref }} to Netflop Global Resource 🐧🐧🐧
+env:
+  AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION  }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESSKEYID }}
+  AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRETKEY }}
+  ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
+on:
+  push:
+    branches:
+      - 'develop'
+      - 'master'
+      - 'manual'
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+  workflow_dispatch:
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+
+#      - name: Cache dependencies # To cache -> reduce dependencies restore and build time. Investigating
+#        uses: actions/cache@v3
+
+      - name: AWS Configuration
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: $AWS_REGION
+          aws-access-key-id: $AWS_ACCESS_KEY_ID
+          aws-secret-key: $AWS_SECRET_KEY
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'oracle'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Execute Gradle build
+        run: gradle task buildZip
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install CDK
+        run: |
+          npm install -g aws-cdk
+
+      - name: CDK Synth
+        run: |
+          cd infrastructure
+          cdk synth -c env=$ENVIRONMENT
+
+#       PUBLISH & UPLOAD ARTIFACT
+#      - name: Upload Artifact
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: dist-file
+#          path: dist
+
+#      - name: Get Artifact
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: dist-file
+
+      - name: CDK bootstrap
+        run: cdk bootstrap -c env=$ENVIRONMENT
+
+      - name: Deploy
+        run: cdk deploy -c env=$ENVIRONMENT --require-approval never

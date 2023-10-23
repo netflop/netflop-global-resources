@@ -31,14 +31,14 @@ jobs:
       - name: Auto add reviewer
         run: |
           # Remove the owner from the reviewers list
-          LIST_REVIEWERS=${${REVIEWERS[@]/"$PR_OWNER"/}//""}
+          for i in "${!REVIEWERS[@]}"; do
+          if [ "${REVIEWERS[$i]}" = "$PR_OWNER" ]; then
+            unset REVIEWERS[$i]
+          fi
+          done
 
           # Build payload
-          PAYLOAD="{\"reviewers\":["
-          for REVIEWER in "${LIST_REVIEWERS[@]}"; do
-          PAYLOAD="$PAYLOAD\"$REVIEWER\","
-          done
-          PAYLOAD="${PAYLOAD%,}]}"
+          JSON_PAYLOAD="{\"reviewers\":[\"${REVIEWERS[@]}\"]}"
 
           curl -L \
             -X POST \
@@ -46,7 +46,7 @@ jobs:
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$GITHUB_PR_NUMBER/requested_reviewers" \
-            -d '{"reviewers":["cuongvu209"]}'
+            -d $JSON_PAYLOAD
 
           echo "Added reviewers $PAYLOAD to pull request $GITHUB_PR_NUMBER"
 

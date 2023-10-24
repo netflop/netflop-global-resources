@@ -7,12 +7,13 @@ env:
   GITHUB_TOKEN: ${{ secrets.TH_GITHUB_TOKEN }}
   REVIEWERS: "thanghuynh2608 cuongvu209 truongyennguyen yoralong"
   PR_OWNER: ${{ github.actor }}
+  REQUEST_REVIEWER_URL: "${{ github.event.pull_request._links.self.href }}/requested_reviewers"
 on:
   push:
     branches:
-      - 'develop'
-      - 'master'
-      - 'manual'
+      - "develop"
+      - "master"
+      - "manual"
   pull_request:
     types:
       - opened
@@ -33,7 +34,7 @@ jobs:
           # Assign value
           #reviewers = $REVIEWERS
           #owner = $PR_OWNER
-          
+
           # Remove the owner from the reviewers list
           #reviewers = ${reviewers//"owner,"}
 
@@ -41,18 +42,17 @@ jobs:
           #JSON_PAYLOAD="{\"reviewers\":[\"${REVIEWERS[@]}\"]}"
 
           #echo $REVIEWERS, $JSON_PAYLOAD
-          echo ${{ github.event.pull_request.self }}/requested_reviewers
-          
+          echo $REQUEST_REVIEWER_URL
+
           curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            ${{ github.event.pull_request.self }}/requested_reviewers \
+            $REQUEST_REVIEWER_BASE \
             -d '{"reviewers": [ "cuongvu209","truongyennguyen","yoralong" ]}'
 
           echo "Added reviewers $PAYLOAD to pull request $GITHUB_PR_NUMBER"
-
 
   deploy-app:
     runs-on: ubuntu-latest
@@ -78,9 +78,9 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'oracle'
+          distribution: "oracle"
           java-version: 17
-          cache: 'gradle'
+          cache: "gradle"
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2

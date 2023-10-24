@@ -49,6 +49,7 @@ jobs:
 
           # Remove the trailing comma and space
           JSON_PAYLOAD=${JSON_PAYLOAD%, }
+          JSON_PAYLOAD="{ \"reviewers\": [ "$JSON_PAYLOAD" ] }"
           echo $JSON_PAYLOAD
 
           curl -L \
@@ -57,7 +58,7 @@ jobs:
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$REQUEST_REVIEWER_URL" \
-            -d '{"reviewers": [ "$JSON_PAYLOAD" ]}'
+            -d "$JSON_PAYLOAD"
   deploy-app:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true

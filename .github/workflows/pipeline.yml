@@ -25,6 +25,7 @@ on:
 jobs:
   add-reviewer:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == false && github.event.created == true
     steps:
       - name: Checkout latest code
         uses: actions/checkout@v4

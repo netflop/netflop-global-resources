@@ -57,7 +57,7 @@ jobs:
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$REQUEST_REVIEWER_URL" \
-            -d '{"reviewers": [ "$JSON_PAYLOAD" ]}'
+            -d '{"reviewers": [ $JSON_PAYLOAD ]}'
   deploy-app:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true

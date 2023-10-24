@@ -49,7 +49,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            $REQUEST_REVIEWER_BASE \
+            "$REQUEST_REVIEWER_URL" \
             -d '{"reviewers": [ "cuongvu209","truongyennguyen","yoralong" ]}'
 
           echo "Added reviewers $PAYLOAD to pull request $GITHUB_PR_NUMBER"

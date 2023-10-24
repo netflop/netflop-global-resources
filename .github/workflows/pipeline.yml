@@ -36,7 +36,7 @@ jobs:
           owner=$PR_OWNER
 
           # Remove the owner from the reviewers list
-          reviewers = ${reviewers//"owner,"}
+          reviewers=${reviewers//"$owner,"}
 
           # Remove spaces after commas and split into an array
           IFS=', ' read -ra values <<< "$reviewers"

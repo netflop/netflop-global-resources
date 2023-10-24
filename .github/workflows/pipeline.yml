@@ -44,7 +44,7 @@ jobs:
           # Build payload
           JSON_PAYLOAD=""
           for value in "${values[@]}"; do
-            JSON_PAYLOAD+="\"$value\","
+            JSON_PAYLOAD+="\"$value\", "
           done
 
           # Remove the trailing comma and space

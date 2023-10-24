@@ -5,7 +5,7 @@ env:
   AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRET_KEY }}
   ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
   GITHUB_TOKEN: ${{ secrets.TH_GITHUB_TOKEN }}
-  REVIEWERS: "thanghuynh2608 cuongvu209 truongyennguyen yoralong"
+  REVIEWERS: "thanghuynh2608, cuongvu209, truongyennguyen, yoralong"
   PR_OWNER: ${{ github.actor }}
   REQUEST_REVIEWER_URL: "${{ github.event.pull_request._links.self.href }}/requested_reviewers"
 on:
@@ -32,17 +32,23 @@ jobs:
       - name: Auto add reviewer
         run: |
           # Assign value
-          #reviewers = $REVIEWERS
-          #owner = $PR_OWNER
+          reviewers=$REVIEWERS
+          owner=$PR_OWNER
 
           # Remove the owner from the reviewers list
-          #reviewers = ${reviewers//"owner,"}
+          reviewers = ${reviewers//"owner,"}
+
+          # Remove spaces after commas and split into an array
+          IFS=', ' read -ra values <<< "$reviewers"
 
           # Build payload
-          #JSON_PAYLOAD="{\"reviewers\":[\"${REVIEWERS[@]}\"]}"
+          JSON_PAYLOAD=""
+          for value in "${values[@]}"; do
+            JSON_PAYLOAD+="\"$value\", "
+          done
 
-          #echo $REVIEWERS, $JSON_PAYLOAD
-          echo $REQUEST_REVIEWER_URL
+          # Remove the trailing comma and space
+          JSON_PAYLOAD=${JSON_PAYLOAD%, }
 
           curl -L \
             -X POST \
@@ -50,7 +56,7 @@ jobs:
             -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "$REQUEST_REVIEWER_URL" \
-            -d '{"reviewers": [ "cuongvu209","truongyennguyen","yoralong" ]}'
+            -d '{"reviewers": [ "$JSON_PAYLOAD" ]}'
 
           echo "Added reviewers $PAYLOAD to pull request $GITHUB_PR_NUMBER"
 

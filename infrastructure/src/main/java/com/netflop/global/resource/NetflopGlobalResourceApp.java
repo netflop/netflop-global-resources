@@ -8,7 +8,13 @@ public class NetflopGlobalResourceApp {
 
         App app = new App();
 
-        new NetflopGlobalResourceStack(app, "NetflopGlobalResourceStack", StackProps.builder()
+        // Get environment
+        String env = (String)app.getNode().tryGetContext("env");
+        if(env == null || env.isEmpty()) {
+            env = "dev";
+        }
+
+        new NetflopGlobalResourceStack(app, "netflop-global-resource-" + env, StackProps.builder()
                 // If you don't specify 'env', this stack will be environment-agnostic.
                 // Account/Region-dependent features and context lookups will not work,
                 // but a single synthesized template can be deployed anywhere.

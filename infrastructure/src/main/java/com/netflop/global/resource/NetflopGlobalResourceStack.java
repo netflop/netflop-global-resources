@@ -122,5 +122,18 @@ public class NetflopGlobalResourceStack extends Stack {
                         .enableTokenRevocation(true)
                         .preventUserExistenceErrors(true)
                 .build());
+
+        // Add user pool group
+        CfnUserPoolGroup adminPoolGroup = CfnUserPoolGroup.Builder.create(this, "admin-pool-group")
+                .userPoolId(pool.getUserPoolId())
+                .groupName("Admin")
+                .description("The admin group of Netflop pool")
+                .build();
+
+        CfnUserPoolGroup userPoolGroup = CfnUserPoolGroup.Builder.create(this, "user-pool-group")
+                .userPoolId(pool.getUserPoolId())
+                .groupName("User")
+                .description("The user group of Netflop pool")
+                .build();
     }
 }

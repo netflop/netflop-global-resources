@@ -1,0 +1,119 @@
+name: GitHub Workflows
+env:
+  AWS_REGION: ${{ secrets.NETFLOP_AWS_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.NETFLOP_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_KEY: ${{ secrets.NETFLOP_AWS_SECRET_KEY }}
+  ENVIRONMENT: ${{ github.base_ref == 'master' && 'prod' || 'dev' }}
+  GITHUB_TOKEN: ${{ secrets.TH_GITHUB_TOKEN }}
+  REVIEWERS: "thanghuynh2608, cuongvu209, truongyennguyen, yoralong"
+  PR_OWNER: ${{ github.actor }}
+  REQUEST_REVIEWER_URL: "${{ github.event.pull_request._links.self.href }}/requested_reviewers"
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+      - closed
+    branches:
+      - 'develop'
+      - 'master'
+  workflow_dispatch:
+
+jobs:
+  add-reviewer:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == false
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+
+      - name: Auto add reviewer
+        run: |
+          # Assign value
+          reviewers=$REVIEWERS
+          owner=$PR_OWNER
+
+          # Remove the owner from the reviewers list
+          reviewers=${reviewers//"$owner,"}
+
+          # Remove spaces after commas and split into an array
+          IFS=', ' read -ra values <<< "$reviewers"
+
+          # Build payload
+          JSON_PAYLOAD=""
+          for value in "${values[@]}"; do
+            JSON_PAYLOAD+="\"$value\", "
+          done
+
+          # Remove the trailing comma and space
+          JSON_PAYLOAD=${JSON_PAYLOAD%, }
+          JSON_PAYLOAD="{ \"reviewers\": [ "$JSON_PAYLOAD" ] }"
+          echo $JSON_PAYLOAD
+
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$REQUEST_REVIEWER_URL" \
+            -d "$JSON_PAYLOAD"
+  deploy-app:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+
+      - name: Check ENV variable
+        run: echo $AWS_REGION, $ENVIRONMENT
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install awscli
+
+      - name: AWS Configuration
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_KEY
+          aws configure set default.region $AWS_REGION
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "oracle"
+          java-version: 17
+          cache: "gradle"
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install CDK
+        run: |
+          npm install -g aws-cdk
+
+      - name: Synth, Bootstrap and Deploy app
+        run: |
+          cd infrastructure
+          cdk synth -c env=$ENVIRONMENT
+          cdk bootstrap -c env=$ENVIRONMENT
+          cdk deploy -c env=$ENVIRONMENT --require-approval never
+
+#       PUBLISH & UPLOAD ARTIFACT
+#      - name: Upload Artifact
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: dist-file
+#          path: dist
+
+#      - name: Get Artifact
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: dist-file

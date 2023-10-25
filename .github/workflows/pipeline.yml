@@ -9,11 +9,6 @@ env:
   PR_OWNER: ${{ github.actor }}
   REQUEST_REVIEWER_URL: "${{ github.event.pull_request._links.self.href }}/requested_reviewers"
 on:
-  push:
-    branches:
-      - "develop"
-      - "master"
-      - "manual"
   pull_request:
     types:
       - opened
@@ -21,7 +16,11 @@ on:
       - edited
       - synchronize
       - closed
+    branches:
+      - 'develop'
+      - 'master'
   workflow_dispatch:
+
 jobs:
   add-reviewer:
     runs-on: ubuntu-latest

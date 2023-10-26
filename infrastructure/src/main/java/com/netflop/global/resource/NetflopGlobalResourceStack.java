@@ -51,13 +51,13 @@ public class NetflopGlobalResourceStack extends Stack {
         // Table user
         TableV2 user = TableV2.Builder.create(this, "netflop-user-dynamodb")
                 .tableName("netflop-user-" + env)
-                .partitionKey(Attribute.builder().name("user-id").type(AttributeType.STRING).build())
+                .partitionKey(Attribute.builder().name("user_id").type(AttributeType.STRING).build())
                 .build();
 
         // Table movie
         TableV2 movie = TableV2.Builder.create(this, "netflop-movie-dynamodb")
                 .tableName("netflop-movie-" + env)
-                .partitionKey(Attribute.builder().name("movie-id").type(AttributeType.STRING).build())
+                .partitionKey(Attribute.builder().name("movie_id").type(AttributeType.STRING).build())
                 .build();
 
         // User pool
@@ -114,6 +114,7 @@ public class NetflopGlobalResourceStack extends Stack {
                         .generateSecret(false)
                         .authFlows(AuthFlow.builder()
                                 .userPassword(true)
+                                .userSrp(true)
                                 .build())
                         .authSessionValidity(Duration.minutes(3))
                         .refreshTokenValidity(Duration.days(30))
